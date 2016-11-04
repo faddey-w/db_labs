@@ -1,6 +1,6 @@
-DROP TABLE Tickets;
-DROP TABLE TrainRuns;
-DROP TABLE RouteStations;
-DROP TABLE Stations;
-DROP TABLE Trains;
-DROP TABLE Routes;
+DROP TABLE Ticket;
+DROP TABLE TrainRun;
+DROP TABLE RouteStation;
+DROP TABLE Station;
+DROP TABLE Train;
+DROP TABLE Route;

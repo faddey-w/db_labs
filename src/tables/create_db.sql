@@ -1,12 +1,12 @@
 -- Станции
-CREATE TABLE IF NOT EXISTS Stations (
+CREATE TABLE Station (
     id SERIAL,
     name VARCHAR(50),
     PRIMARY KEY(id)
 );
 
 -- Поезда
-CREATE TABLE IF NOT EXISTS Trains (
+CREATE TABLE Train (
     id SERIAL,
     model_name VARCHAR(20),
     type ENUM("электропоезд", "дизель", "пассажирский", "скоростной"),
@@ -18,14 +18,13 @@ CREATE TABLE IF NOT EXISTS Trains (
 );
 
 -- Маршруты
-CREATE TABLE IF NOT EXISTS Routes (
+CREATE TABLE Route (
     id SERIAL,
     PRIMARY KEY (id)
 );
 
-
 -- Станции, которые поезд проходит на данном маршруте
-CREATE TABLE IF NOT EXISTS RouteStations (
+CREATE TABLE RouteStation (
     route_id BIGINT UNSIGNED,
     station_id BIGINT UNSIGNED,
     -- необходимо указывать порядок следования станций
@@ -47,12 +46,12 @@ CREATE TABLE IF NOT EXISTS RouteStations (
     -- на каком отрезке пути место в поезде свободно, а на каком - нет
     UNIQUE (route_id, station_id),
 
-    FOREIGN KEY (route_id) REFERENCES Routes(id),
-    FOREIGN KEY (station_id) REFERENCES Stations(id)
+    FOREIGN KEY (route_id) REFERENCES Route(id),
+    FOREIGN KEY (station_id) REFERENCES Station(id)
 );
 
-
-CREATE TABLE IF NOT EXISTS TrainRuns (
+-- Конкретные поездки
+CREATE TABLE TrainRun (
     id SERIAL,
     route_id BIGINT UNSIGNED,
     train_id BIGINT UNSIGNED,
@@ -65,13 +64,12 @@ CREATE TABLE IF NOT EXISTS TrainRuns (
 
     PRIMARY KEY (id),
 
-    FOREIGN KEY (route_id) REFERENCES Routes(id),
-    FOREIGN KEY (train_id) REFERENCES Trains(id)
+    FOREIGN KEY (route_id) REFERENCES Route(id),
+    FOREIGN KEY (train_id) REFERENCES Train(id)
 );
 
-
 -- Билет
-CREATE TABLE IF NOT EXISTS Tickets (
+CREATE TABLE Ticket (
     id SERIAL,
     train_run_id BIGINT UNSIGNED,
 
@@ -90,9 +88,11 @@ CREATE TABLE IF NOT EXISTS Tickets (
 
     PRIMARY KEY (id),
 
+    UNIQUE (train_run_id, seat_id),
+
     -- Здесь также имеются некоторые ограничения, которые нельзя выразить внешними ключами
     -- Например, конечная и начальная станции билета должны присутствовать в маршруте
-    FOREIGN KEY (train_run_id) REFERENCES TrainRuns(id),
-    FOREIGN KEY (from_station_id) REFERENCES Stations(id),
-    FOREIGN KEY (to_station_id) REFERENCES Stations(id)
-)
+    FOREIGN KEY (train_run_id) REFERENCES TrainRun(id),
+    FOREIGN KEY (from_station_id) REFERENCES Station(id),
+    FOREIGN KEY (to_station_id) REFERENCES Station(id)
+);
