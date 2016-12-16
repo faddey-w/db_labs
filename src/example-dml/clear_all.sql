@@ -1,0 +1,6 @@
+DELETE FROM Ticket;
+DELETE FROM TrainRun;
+DELETE FROM RouteStation;
+DELETE FROM Station;
+DELETE FROM Train;
+DELETE FROM Route;
