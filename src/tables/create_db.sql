@@ -20,6 +20,8 @@ CREATE TABLE Train (
 -- Маршруты
 CREATE TABLE Route (
     id SERIAL,
+    identifier CHAR(3),
+    UNIQUE (identifier),
     PRIMARY KEY (id)
 );
 
@@ -88,7 +90,6 @@ CREATE TABLE Ticket (
 
     PRIMARY KEY (id),
 
-    UNIQUE (train_run_id, seat_id),
 
     -- Здесь также имеются некоторые ограничения, которые нельзя выразить внешними ключами
     -- Например, конечная и начальная станции билета должны присутствовать в маршруте
