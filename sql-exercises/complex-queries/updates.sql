@@ -1,4 +1,42 @@
 
+-- Перераспределить вагоны по поездам пропорционально нагрузке
+SET @total_seats = (SELECT SUM(num_seats) FROM Train);
+UPDATE Train
+SET num_seats = IFNULL((
+    SELECT this_train_tickets.count * @total_seats / all_tickets.count
+    FROM (
+        SELECT COUNT(*) AS count, TrainRun.train_id AS train_id FROM Ticket
+        INNER JOIN TrainRun ON Ticket.train_run_id = TrainRun.id
+        GROUP BY TrainRun.train_id
+    ) AS this_train_tickets, (
+        SELECT COUNT(*) AS count FROM Ticket
+    ) as all_tickets
+    WHERE this_train_tickets.train_id = Train.id
+), 0);
+
+
+-- Отсоединить последний вагон от всех поездов, где он не занят
+UPDATE Train
+SET num_seats = num_seats-100
+WHERE NOT EXISTS(
+    SELECT * FROM Ticket
+    INNER JOIN TrainRun ON TrainRun.id = Ticket.train_run_id
+    WHERE TrainRun.train_id = Train.id
+        AND Ticket.seat_id >= Train.num_seats-100
+        AND Train.num_seats > 100
+) AND Train.num_seats > 100;
+
+
+-- Отменить все рейсы, проходящие через указанную станцию
+SET @blocked_station_id = 12;
+DELETE FROM TrainRun
+WHERE @blocked_station_id = ANY(
+    SELECT station_id FROM RouteStation
+    WHERE RouteStation.route_id = TrainRun.route_id
+);
+
+
+
 -- Добавляет в базу новый билет, автоматически присваивая ему свободное место.
 -- Предполагается, что такое место существует.
 SET @train_run_id = 2;
@@ -34,4 +72,4 @@ VALUES (
         dense.result
     )
     FROM (SELECT COUNT(*) AS result FROM Ticket WHERE train_run_id = @train_run_id) as dense
-)
+);
